@@ -1,0 +1,279 @@
+# Aprendizaje Supervisado
+
+
+## Obtención de la data:
+
+
+Para la obtención de la DataFrame se obtiene la predicción de deserción escolar de la: Irvine, Universidad de California (UCI) [Ver](https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success)
+
+
+El DataFrame original en su target tiene los siguientes estados: 'Dropout', 'Enrolled', 'Graduate'. Y hay que reducirlos a Enrolled y Graduate para podemos usar como 0 y 1 respectivamente.
+
+
+### Desarrollo
+
+
+#### Se instala la librería del DataFrame
+```{python}
+!pip install ucimlrepo
+```
+
+
+#### Válido si está correctamente instalada la librería
+```{python}
+import ucimlrepo
+print("ucimlrepo instalado correctamente")
+```
+
+
+#### Se obtiene el dataFrame desde la url de la UCI
+```{python}
+
+
+from ucimlrepo import fetch_ucirepo 
+  
+# fetch dataset 697
+predict_students_dropout_and_academic_success = fetch_ucirepo(id=697) 
+  
+# data (as pandas dataframes) 
+X = predict_students_dropout_and_academic_success.data.features 
+y = predict_students_dropout_and_academic_success.data.targets 
+  
+# metadata 
+print(predict_students_dropout_and_academic_success.metadata) 
+  
+# variable information 
+print(predict_students_dropout_and_academic_success.variables) 
+
+
+```
+**Nota**
+Código tomado del apartado para Python del proveedor de datos
+
+
+#### Conversión de estados del Target
+
+
+##### Importar pendiente
+
+
+```{python}
+from sklearn.model_selection import train_test_split
+```
+
+
+##### Convertir tres estados en dos estados
+
+
+```{python}
+
+
+# data (as pandas dataframes) 
+X = predict_students_dropout_and_academic_success.data.features 
+y_original = predict_students_dropout_and_academic_success.data.targets 
+
+
+# Mostramos estado Original
+print("Información del dataset:")
+print(f"X shape: {X.shape}")
+print(f"y shape: {y_original.shape}")
+print(f"Clases originales en y: {y_original['Target'].unique()}")
+
+
+# Convertir estados en valores de 0 o 1
+y = y_original['Target'].map({'Dropout': 0, 'Enrolled': 1, 'Graduate': 1})
+
+
+## borrar print(f"Clases binarias en y: {y.unique()}")
+## borrar print(f"Distribución de clases: {y.value_counts()}")
+
+
+print("\nValores para y:")
+print(y.head(3))
+
+
+print("\nValores para X:")
+print(X.head(3))
+
+
+```
+
+
+## Clasificación sin pipeline
+
+
+Se usa con pasos manuales separados
+
+
+### Split de datos para entrenamiento y prueba (como en tu Actividad 5)
+
+
+```{python}
+X_train, X_test, y_train, y_test = train_test_split(
+
+    X, ## Data 
+    y, ## Target
+    test_size=0.2, ## Entrenamiento con el 20% 
+    random_state=42, ## La división cambia cada vez (aleatoria), lo que hace difícil comparar resultados o depurar, y con 42 es para obtener la misma division.
+    stratify=y ## Guarda la proporsion 
+    )
+
+
+print(f"\nDatos de entrenamiento: X_train={X_train.shape}, y_train={y_train.shape}")
+print(f"Datos de prueba: X_test={X_test.shape}, y_test={y_test.shape}")
+```
+
+
+
+
+### Importar librerías para sklearn
+
+
+```{python}
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, ConfusionMatrixDisplay
+```
+
+
+### Escalamos el modelo
+```{python}
+
+
+# 2. Escalar datos (manual)
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+
+```
+
+
+### Entrenamos el modelo
+```{python}
+# 3. Entrenar modelo
+model = LogisticRegression(max_iter=1000000)
+model.fit(X_train_scaled, y_train)
+```
+
+
+### Se levanta la predicción del modelo
+
+
+```{python}
+# 4. Predecir y evaluar
+y_pred = model.predict(X_test_scaled)
+
+
+```
+
+
+### Se hace la evolución del modelo
+```{python}
+accuracy = accuracy_score(y_test, y_pred)
+precciion=precision_score(y_test, y_pred)
+recal=recall_score(y_test, y_pred)
+f1= f1_score(y_test, y_pred)
+
+
+print(f"Accuracy: {accuracy}")
+print(f"Precciion: {precciion}")
+print(f"Recal score: {recal}")
+print(f"F1: {f1_score}")
+```
+
+
+### Se Grafica de predictibilidad
+```{python}
+
+
+ConfusionMatrixDisplay.from_predictions(y_test,y_pred)
+
+
+```
+## Clasificación con pipeline
+
+
+### Split de datos para entrenamiento y prueba (como en tu Actividad 5)
+
+
+```{python}
+X_train_pipe, X_test_pipe, y_train_pipe, y_test_pipe = train_test_split(
+
+    X, ## Data 
+    y, ## Target
+    test_size=0.2, ## Entrenamiento con el 20% 
+    random_state=42, ## La división cambia cada vez (aleatoria), lo que hace difícil comparar resultados o depurar, y con 42 es para obtener la misma división.
+    stratify=y ## Guarda la proporción 
+    )
+
+
+print(f"\nDatos de entrenamiento: X_train={X_train_pipe.shape}, y_train={y_train_pipe.shape}")
+print(f"Datos de prueba: X_test={X_test_pipe.shape}, y_test={y_test_pipe.shape}")
+```
+
+
+### Importar librerías para sklearn
+
+
+```{python}
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score
+```
+
+
+### Crear pipeline: escalado y modelo  
+```{python}
+pipeline = Pipeline([
+    ('scaler', StandardScaler()),  # Paso 1: Escalar
+    ('classifier', LogisticRegression(max_iter=1000000))  # Paso 2: Modelo
+])
+```
+### Entrenamos el modelo
+```{python}
+# Entrenar pipeline (escala y entrena automáticamente)
+pipeline.fit(X_train_pipe, y_train_pipe)
+```
+
+
+### Se levanta la prediccion del modelo
+```{python}
+# Predecir (escala y predice automáticamente)
+y_pred_pipe = pipeline.predict(X_test_pipe)
+
+
+```
+
+
+### Se hace la evolución del model
+
+
+```{python}
+accuracy_pipe = accuracy_score(y_test_pipe, y_pred_pipe)
+precciion_pipe=precision_score(y_test_pipe, y_pred_pipe)
+recal_pipe=recall_score(y_test_pipe, y_pred_pipe)
+f1_pipe= f1_score(y_test_pipe, y_pred_pipe)
+
+
+print(f"Accuracy: {accuracy_pipe}")
+print(f"Precciion: {precciion_pipe}")
+print(f"Recal score: {recal_pipe}")
+print(f"F1: {f1_pipe}")
+
+
+```
+
+
+
+
+### Se Grafica de predictibilidad
+```{python}
+ConfusionMatrixDisplay.from_predictions(y_test_pipe,y_pred_pipe)
+```
+
+## Conclusiones y Recomendaciones
+
+Ambos métodos usan el mismo algoritmo de clasificación, pero el pipeline es una buena práctica para automatizar se diseña con menos pasos, pero la ejecución es idéntica.

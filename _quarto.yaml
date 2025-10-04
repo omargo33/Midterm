@@ -1,0 +1,16 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "Aprendizaje Supervisado"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+format:
+  html:
+    theme: Cerulean
+    toc: true
+    code-fold: true
+    fig-align: center
