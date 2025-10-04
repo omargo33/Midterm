@@ -1,5 +1,6 @@
 # Aprendizaje Supervisado
 
+Autor: Omar Velez - omar.velez@yachaytech.edu.ec
 
 ## Obtención de la data:
 
@@ -111,6 +112,7 @@ Se usa con pasos manuales separados
 ```{python}
 X_train, X_test, y_train, y_test = train_test_split(
 
+
     X, ## Data 
     y, ## Target
     test_size=0.2, ## Entrenamiento con el 20% 
@@ -169,7 +171,7 @@ y_pred = model.predict(X_test_scaled)
 ```
 
 
-### Se hace la evolución del modelo
+### Se hace la evaluación del modelo
 ```{python}
 accuracy = accuracy_score(y_test, y_pred)
 precciion=precision_score(y_test, y_pred)
@@ -186,12 +188,81 @@ print(f"F1: {f1_score}")
 
 ### Se Grafica de predictibilidad
 ```{python}
-
-
 ConfusionMatrixDisplay.from_predictions(y_test,y_pred)
-
-
 ```
+
+## Regresión: Predicción de Edad del Estudiante
+
+### Obtención de datos para regresión
+
+Uso el mismo dataset, pero ahora predeciremos la **edad** (variable continua) en lugar de la clase binaria.
+
+
+### Importar librerías para sklearn
+```{python}
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+```
+
+### Tomo las datos y el Target
+```{python}
+y_reg = X['Age at enrollment']
+X_reg = X.drop('Age at enrollment', axis=1)
+```
+
+### Split de datos para regresión
+
+```{python}
+from sklearn.model_selection import train_test_split
+
+X_train_reg, X_test_reg, y_train_reg, y_test_reg = train_test_split(
+
+    X_reg, y_reg, test_size=0.2, random_state=42
+)
+
+print(f"Datos de regresión - Train: {X_train_reg.shape}, Test: {X_test_reg.shape}")
+```
+### Entrenamos el modelo
+
+```{python}
+# Crear y entrenar modelo
+reg_model = LinearRegression()
+reg_model.fit(X_train_reg, y_train_reg)
+```
+
+### Se levanta la predicción del modelo
+
+```{python}
+# Hacer predicción
+y_pred_reg = reg_model.predict(X_test_reg)
+```
+
+```{python}
+
+# Evaluar
+mse = mean_squared_error(y_test_reg, y_pred_reg)
+r2 = r2_score(y_test_reg, y_pred_reg)
+
+print(f"MSE (Error cuadrático medio): {mse:.2f}")
+print(f"R² (Coeficiente de determinación): {r2:.2f}")
+```
+
+### Gráfico de Regresión
+
+```{python}
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 6))
+plt.scatter(y_test_reg, y_pred_reg, alpha=0.7)
+plt.plot([y_test_reg.min(), y_test_reg.max()], [y_test_reg.min(), y_test_reg.max()], 'r--', lw=2)
+plt.xlabel('Edad Real')
+plt.ylabel('Edad Predicha')
+plt.title('Regresión: Edad Real vs Predicha')
+plt.grid(True)
+plt.show()
+```
+
+
 ## Clasificación con pipeline
 
 
@@ -200,6 +271,7 @@ ConfusionMatrixDisplay.from_predictions(y_test,y_pred)
 
 ```{python}
 X_train_pipe, X_test_pipe, y_train_pipe, y_test_pipe = train_test_split(
+
 
     X, ## Data 
     y, ## Target
@@ -224,7 +296,6 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score
 ```
 
-
 ### Crear pipeline: escalado y modelo  
 ```{python}
 pipeline = Pipeline([
@@ -248,7 +319,7 @@ y_pred_pipe = pipeline.predict(X_test_pipe)
 ```
 
 
-### Se hace la evolución del model
+### Se hace la evaluación del model
 
 
 ```{python}
@@ -274,6 +345,90 @@ print(f"F1: {f1_pipe}")
 ConfusionMatrixDisplay.from_predictions(y_test_pipe,y_pred_pipe)
 ```
 
-## Conclusiones y Recomendaciones
 
-Ambos métodos usan el mismo algoritmo de clasificación, pero el pipeline es una buena práctica para automatizar se diseña con menos pasos, pero la ejecución es idéntica.
+## Regresión: Predicción de Edad del Estudiante con Pipeline
+
+### Importar librerías para sklearn
+
+```{python}
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+
+```
+### Crear el pipeline: ecalando y modelo
+```{python}
+# Crear pipeline para regresión
+pipeline_reg = Pipeline([
+    ('scaler', StandardScaler()),
+    ('regressor', LinearRegression())
+])
+
+```
+### Entrenamiento del modelo
+```{python}
+
+# Entrenar
+pipeline_reg.fit(X_train_reg, y_train_reg)
+
+```
+### Se levanta la predicción del modelo
+```{python}
+
+# Predecir
+y_pred_reg = pipeline_reg.predict(X_test_reg)
+
+```
+### Se hace la evolución del modelo
+```{python}
+
+# Evaluar
+mse = mean_squared_error(y_test_reg, y_pred_reg)
+r2 = r2_score(y_test_reg, y_pred_reg)
+
+print(f"MSE (Error cuadrático medio): {mse:.2f}")
+print(f"R² (Coeficiente de determinación): {r2:.2f}")
+```
+
+### Gráfico de Regresión
+
+```{python}
+import matplotlib.pyplot as plt
+
+plt.figure(figsize=(8, 6))
+plt.scatter(y_test_reg, y_pred_reg, alpha=0.7)
+plt.plot([y_test_reg.min(), y_test_reg.max()], [y_test_reg.min(), y_test_reg.max()], 'r--', lw=2)
+plt.xlabel('Edad Real')
+plt.ylabel('Edad Predicha')
+plt.title('Regresión: Edad Real vs Predicha')
+plt.grid(True)
+plt.show()
+```
+
+## Conclusiones 
+
+### Conclusiones de Clasificación
+
+- **Accuracy**: Con 88% la clasificación es correcta para la mayoría de los casos.
+
+- **Precisión**: Con 88.14% indica que es alta y da confiabilidad y limita falsos positivos
+
+- **Recall**: de 95.17% el modelo si detecta los estudiantes que abandonan.
+
+- **F1 Balanceado**: 91.52% la media armónica entre Precisión y Recall es alta, por lo que es balanceado el nivel de abandonos y las falsas alertas.
+
+Para ambos métodos usamos el mismo algoritmo de clasificación, solo que el pipeline es una buena práctica, ya que se crea con menos pasos y la respuesta es idéntica.
+
+### Conclusiones de Regresión
+
+- **MSE**: El valor obtenido indica el promedio de los errores al cuadrado entre las edades reales y predichas. Un MSE bajo de 32.16 indica que se tiene un buen ajuste.
+
+- **R 2**: El valor de R2 muestra qué porcentaje de la variabilidad en la edad es explicada por el modelo. Un R² cercano a 1 indica un buen ajuste, mientras que valores bajos sugieren que otras variables o modelos más complejos podrían mejorar la predicción.
+
+- **Comparación con Pipeline**: Al igual que en clasificación, usar pipeline en regresión evita data leakage(también conocida como fuga de datos) y facilita el proceso, con resultados similares al método por pasos.
+
+--- 
+
+*Nota*: Como desarrollador veo que al usar pipeline se puede automatizar nuevos escenarios, pues en una sola funcion se pudiese implemantar otras funcionalidades y ejecutar en forma masivas para tener resultados automaticos
+
