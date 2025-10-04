@@ -421,7 +421,7 @@ Para ambos métodos usamos el mismo algoritmo de clasificación, solo que el pip
 
 - **MSE**: El valor obtenido indica el promedio de los errores al cuadrado entre las edades reales y predichas. Un MSE bajo de 32.16 indica que se tiene un buen ajuste.
 
-- **R 2**: El valor de R2 muestra qué porcentaje de la variabilidad en la edad es explicada por el modelo. Un R² cercano a 1 indica un buen ajuste, mientras que valores bajos sugieren que otras variables o modelos más complejos podrían mejorar la predicción.
+- **R 2**: El valor de R2 muestra qué porcentaje de la variabilidad en la edad SI es explicada por el modelo.
 
 - **Comparación con Pipeline**: Al igual que en clasificación, usar pipeline en regresión evita data leakage(también conocida como fuga de datos) y facilita el proceso, con resultados similares al método por pasos.
 
